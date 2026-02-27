@@ -1,0 +1,100 @@
+@page "/manage-appointments"
+@rendermode InteractiveAuto
+@attribute [Authorize(Roles = "Psychologist")]
+@inject HttpClient Http
+
+<h1>Manage Appointments</h1>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (appointments is null || appointments.Count == 0)
+{
+    <p>No appointments yet.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Client</th>
+                <th>Date &amp; Time</th>
+                <th>Duration</th>
+                <th>Notes</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var appt in appointments)
+            {
+                <tr>
+                    <td>@appt.ClientName</td>
+                    <td>@appt.Slot.StartsAt.ToLocalTime().ToString("ddd, MMM d yyyy HH:mm")</td>
+                    <td>@appt.Slot.DurationMinutes min</td>
+                    <td>@(appt.Notes ?? "-")</td>
+                    <td>
+                        <span class="badge @GetStatusBadge(appt.Status)">@appt.Status</span>
+                    </td>
+                    <td>
+                        @if (appt.Status == AppointmentStatus.Pending)
+                        {
+                            <button class="btn btn-success btn-sm me-1" @onclick="() => UpdateStatus(appt.Id, AppointmentStatus.Accepted)">
+                                Accept
+                            </button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => UpdateStatus(appt.Id, AppointmentStatus.Declined)">
+                                Decline
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<AppointmentDto>? appointments;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAppointments();
+    }
+
+    private async Task LoadAppointments()
+    {
+        isLoading = true;
+        try
+        {
+            appointments = await Http.GetFromJsonAsync<List<AppointmentDto>>("/api/appointments");
+        }
+        catch
+        {
+            appointments = new();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task UpdateStatus(int id, AppointmentStatus status)
+    {
+        var response = await Http.PutAsJsonAsync($"/api/appointments/{id}/status", new { Status = (int)status });
+        if (response.IsSuccessStatusCode)
+            await LoadAppointments();
+    }
+
+    private static string GetStatusBadge(AppointmentStatus status) => status switch
+    {
+        AppointmentStatus.Accepted => "bg-success",
+        AppointmentStatus.Declined => "bg-danger",
+        _ => "bg-warning text-dark"
+    };
+
+    private enum AppointmentStatus { Pending, Accepted, Declined }
+    private record SlotDto(int Id, DateTime StartsAt, int DurationMinutes);
+    private record AppointmentDto(int Id, SlotDto Slot, string ClientName, AppointmentStatus Status, string? Notes);
+}
