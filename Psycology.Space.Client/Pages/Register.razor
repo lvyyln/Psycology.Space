@@ -1,5 +1,5 @@
 @page "/register"
-@rendermode InteractiveAuto
+@rendermode @(new InteractiveAutoRenderMode(prerender: false))
 @using Blazored.LocalStorage
 @using Psycology.Space.Client.Auth
 @inject HttpClient Http

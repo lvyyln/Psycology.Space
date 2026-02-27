@@ -1,8 +1,11 @@
 using System.Text;
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Psycology.Space.Client.Auth;
 using Psycology.Space.Client.Pages;
 using Psycology.Space.Components;
 using Psycology.Space.Data;
@@ -44,6 +47,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<TokenService>();
+
+// Blazored LocalStorage + JWT auth state provider for Blazor server circuits
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddScoped<JwtAuthStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
+    sp.GetRequiredService<JwtAuthStateProvider>());
 
 // Razor + Blazor
 builder.Services.AddRazorComponents()

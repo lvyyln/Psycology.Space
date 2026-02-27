@@ -1,5 +1,5 @@
 @page "/manage-slots"
-@rendermode InteractiveAuto
+@rendermode @(new InteractiveAutoRenderMode(prerender: false))
 @attribute [Authorize(Roles = "Psychologist")]
 @inject HttpClient Http
 
