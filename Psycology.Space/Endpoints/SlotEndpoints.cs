@@ -20,6 +20,15 @@ public static class SlotEndpoints
             return Results.Ok(slots);
         });
 
+        group.MapGet("/all", async (ApplicationDbContext db) =>
+        {
+            var slots = await db.AvailableSlots
+                .OrderBy(s => s.StartsAt)
+                .Select(s => new SlotDetailDto(s.Id, s.StartsAt, s.DurationMinutes, s.IsBooked))
+                .ToListAsync();
+            return Results.Ok(slots);
+        }).RequireAuthorization(p => p.RequireRole("Psychologist"));
+
         group.MapPost("/", async (CreateSlotRequest request, ApplicationDbContext db) =>
         {
             var slot = new AvailableSlot

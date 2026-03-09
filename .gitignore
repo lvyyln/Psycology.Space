@@ -41,3 +41,12 @@ publish/
 ## OS
 .DS_Store
 Thumbs.db
+
+## Frontend
+node_modules/
+frontend/dist/
+
+## SQLite
+*.db
+*.db-shm
+*.db-wal

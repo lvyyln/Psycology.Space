@@ -1,0 +1,86 @@
+:root {
+  --primary: #4a90a4;
+  --primary-dark: #3a7a8e;
+  --accent: #5ba08a;
+  --danger: #d9534f;
+  --bg: #f0f4f8;
+  --card: #ffffff;
+  --text: #2d3748;
+  --muted: #718096;
+  --border: #e2e8f0;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--primary); }
+
+.page-card {
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(74, 144, 164, 0.10);
+  padding: 2rem 2.5rem;
+  max-width: 820px;
+  margin: 2rem auto;
+}
+
+/* Section headings with left accent bar */
+h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+  padding-left: 0.75rem;
+  border-left: 4px solid var(--primary);
+}
+
+h3 {
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+/* Form inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="datetime-local"],
+textarea {
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  font-size: 1rem;
+  color: var(--text);
+  background: #fafcfd;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.15);
+}
+
+/* Generic button styles */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.95rem;
+  padding: 0.55rem 1.3rem;
+  transition: background 0.15s, opacity 0.15s, transform 0.1s;
+}
+
+button:active:not(:disabled) { transform: scale(0.98); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }

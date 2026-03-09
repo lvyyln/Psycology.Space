@@ -1,13 +1,8 @@
 using System.Text;
-using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Psycology.Space.Client.Auth;
-using Psycology.Space.Client.Pages;
-using Psycology.Space.Components;
 using Psycology.Space.Data;
 using Psycology.Space.Endpoints;
 using Psycology.Space.Services;
@@ -45,79 +40,32 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 builder.Services.AddAuthorization();
+builder.Services.AddValidation();
 
 builder.Services.AddScoped<TokenService>();
 
-// Blazored LocalStorage + JWT auth state provider for Blazor server circuits
-builder.Services.AddBlazoredLocalStorage();
-builder.Services.AddScoped<JwtAuthStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
-    sp.GetRequiredService<JwtAuthStateProvider>());
-
-// Razor + Blazor
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents();
-
 var app = builder.Build();
 
-// Run migrations and seed
-using (var scope = app.Services.CreateScope())
+await DataSeeder.SeedAsync(app.Services);
+
+if (!app.Environment.IsDevelopment())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
-
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-    if (!await roleManager.RoleExistsAsync("Psychologist"))
-        await roleManager.CreateAsync(new IdentityRole("Psychologist"));
-
-    if (!await roleManager.RoleExistsAsync("Client"))
-        await roleManager.CreateAsync(new IdentityRole("Client"));
-
-    const string psychEmail = "psych@psycology.space";
-    if (await userManager.FindByEmailAsync(psychEmail) is null)
-    {
-        var psychologist = new ApplicationUser
-        {
-            UserName = psychEmail,
-            Email = psychEmail,
-            FullName = "Dr. Psychologist",
-            EmailConfirmed = true
-        };
-        await userManager.CreateAsync(psychologist, "Psychologist1!");
-        await userManager.AddToRoleAsync(psychologist, "Psychologist");
-    }
-}
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseWebAssemblyDebugging();
-}
-else
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseAntiforgery();
 
 // API endpoints
 app.MapAuthEndpoints();
 app.MapSlotEndpoints();
 app.MapAppointmentEndpoints();
+app.MapIntakeEndpoints();
 
-app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(Psycology.Space.Client._Imports).Assembly);
+// Serve Vue SPA
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.MapFallbackToFile("index.html");
 
 app.Run();

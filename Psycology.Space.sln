@@ -1,8 +1,6 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Psycology.Space", "Psycology.Space\Psycology.Space.csproj", "{655957EB-C07A-4702-B59F-025FD851061A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Psycology.Space.Client", "Psycology.Space.Client\Psycology.Space.Client.csproj", "{9704F7E5-81F6-4DC7-9CB2-CB5B08949895}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,9 +12,5 @@ Global
 		{655957EB-C07A-4702-B59F-025FD851061A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{655957EB-C07A-4702-B59F-025FD851061A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{655957EB-C07A-4702-B59F-025FD851061A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9704F7E5-81F6-4DC7-9CB2-CB5B08949895}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9704F7E5-81F6-4DC7-9CB2-CB5B08949895}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9704F7E5-81F6-4DC7-9CB2-CB5B08949895}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9704F7E5-81F6-4DC7-9CB2-CB5B08949895}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

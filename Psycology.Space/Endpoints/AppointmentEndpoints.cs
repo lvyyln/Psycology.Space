@@ -30,6 +30,7 @@ public static class AppointmentEndpoints
                     a.Id,
                     new SlotDto(a.Slot.Id, a.Slot.StartsAt, a.Slot.DurationMinutes),
                     a.Client.FullName,
+                    a.Client.Email!,
                     a.Status,
                     a.Notes))
                 .ToListAsync();
@@ -44,14 +45,17 @@ public static class AppointmentEndpoints
         {
             var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            var slot = await db.AvailableSlots.FindAsync(request.SlotId);
-            if (slot is null) return Results.NotFound("Slot not found.");
-            if (slot.IsBooked) return Results.BadRequest("Slot is already booked.");
+            // Atomic conditional update — prevents double-booking race condition
+            var updated = await db.AvailableSlots
+                .Where(s => s.Id == request.SlotId && !s.IsBooked)
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.IsBooked, true));
 
-            slot.IsBooked = true;
+            if (updated == 0)
+                return Results.BadRequest("Slot is no longer available.");
+
             var appointment = new Appointment
             {
-                SlotId = slot.Id,
+                SlotId = request.SlotId,
                 ClientId = userId,
                 Notes = request.Notes,
                 Status = AppointmentStatus.Pending
@@ -68,8 +72,32 @@ public static class AppointmentEndpoints
                     appointment.Id,
                     new SlotDto(appointment.Slot.Id, appointment.Slot.StartsAt, appointment.Slot.DurationMinutes),
                     appointment.Client.FullName,
+                    appointment.Client.Email!,
                     appointment.Status,
                     appointment.Notes));
+        }).RequireAuthorization(p => p.RequireRole("Client"));
+
+        group.MapDelete("/{id:int}", async (
+            int id,
+            ClaimsPrincipal principal,
+            ApplicationDbContext db) =>
+        {
+            var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            var appointment = await db.Appointments
+                .Include(a => a.Slot)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (appointment is null) return Results.NotFound();
+            if (appointment.ClientId != userId) return Results.Forbid();
+            if (appointment.Status == AppointmentStatus.Declined)
+                return Results.BadRequest("Cannot cancel a declined appointment.");
+
+            appointment.Slot.IsBooked = false;
+            db.Appointments.Remove(appointment);
+            await db.SaveChangesAsync();
+
+            return Results.NoContent();
         }).RequireAuthorization(p => p.RequireRole("Client"));
 
         group.MapPut("/{id:int}/status", async (

@@ -9,4 +9,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<AvailableSlot> AvailableSlots => Set<AvailableSlot>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
+    public DbSet<IntakeResponse> IntakeResponses => Set<IntakeResponse>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 }
